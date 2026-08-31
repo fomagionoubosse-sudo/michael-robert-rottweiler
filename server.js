@@ -43,8 +43,7 @@ const imageSlots = [
   ['contact', 'Contact section image']
 ];
 const insertSlot = db.prepare('INSERT OR IGNORE INTO site_images (slot,label,image) VALUES (?,?,?)');
-for (const s of imageSlots) insertSlot.run(...s);
-
+for (const s of imageSlots) insertSlot.run(s[0], s[1], '');
 const count = db.prepare('SELECT COUNT(*) c FROM puppies').get().c;
 if (!count) {
   const add = db.prepare('INSERT INTO puppies (name,gender,age,price,status,description,image) VALUES (?,?,?,?,?,?,?)');
