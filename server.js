@@ -28,11 +28,11 @@ CREATE TABLE IF NOT EXISTS puppies (
   image TEXT DEFAULT '',
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
-CREATE TABLE IF NOT EXISTS site_images (
+CREATE TABLE IF NOT EXISTS process_steps (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  slot TEXT UNIQUE NOT NULL,
-  label TEXT NOT NULL,
-  image TEXT DEFAULT ''
+  step_number TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL
 );
 `);
 
@@ -44,6 +44,17 @@ const imageSlots = [
 ];
 const insertSlot = db.prepare('INSERT OR IGNORE INTO site_images (slot,label,image) VALUES (?,?,?)');
 for (const s of imageSlots) insertSlot.run(s[0], s[1], '');
+const processCount = db.prepare('SELECT COUNT(*) c FROM process_steps').get().c;
+
+if (!processCount) {
+  const addProcess = db.prepare(
+    'INSERT INTO process_steps (step_number,title,description) VALUES (?,?,?)'
+  );
+
+  addProcess.run('01', 'Choose a puppy', 'Review the current listings and puppy information.');
+  addProcess.run('02', 'Ask questions', 'Contact us to discuss the puppy and your home.');
+  addProcess.run('03', 'Arrange pickup', 'Confirm the details and agree on a responsible handover.');
+}
 const count = db.prepare('SELECT COUNT(*) c FROM puppies').get().c;
 if (!count) {
   const add = db.prepare('INSERT INTO puppies (name,gender,age,price,status,description,image) VALUES (?,?,?,?,?,?,?)');
@@ -112,9 +123,15 @@ app.post('/admin/logout', requireAdmin, (req, res) => req.session.destroy(() => 
 app.get('/admin', requireAdmin, (req, res) => {
   const puppies = db.prepare('SELECT * FROM puppies ORDER BY id DESC').all();
   const images = db.prepare('SELECT * FROM site_images ORDER BY id').all();
-  res.render('admin', { puppies, images, message: req.query.message || '' });
-});
+  const processSteps = db.prepare('SELECT * FROM process_steps ORDER BY id').all();
 
+  res.render('admin', {
+    puppies,
+    images,
+    processSteps,
+    message: req.query.message || ''
+  });
+});
 app.post('/admin/puppies/add', requireAdmin, upload.single('image'), (req, res) => {
   const { name, gender, age, price, status, description } = req.body;
   if (!name || !gender || !age || !price) return res.redirect('/admin?message=Please+fill+all+required+puppy+fields');
@@ -146,7 +163,38 @@ app.post('/admin/images/:slot', requireAdmin, upload.single('image'), (req, res)
   if (old?.image) fs.rm(path.join(uploadDir, old.image), { force: true }, () => {});
   res.redirect('/admin?message=Website+image+updated');
 });
+app.post('/admin/process/update', requireAdmin, (req, res) => {
+  const steps = [
+    {
+      id: 1,
+      step_number: '01',
+      title: req.body.title1,
+      description: req.body.description1
+    },
+    {
+      id: 2,
+      step_number: '02',
+      title: req.body.title2,
+      description: req.body.description2
+    },
+    {
+      id: 3,
+      step_number: '03',
+      title: req.body.title3,
+      description: req.body.description3
+    }
+  ];
 
+  const update = db.prepare(
+    'UPDATE process_steps SET title=?, description=? WHERE id=?'
+  );
+
+  for (const step of steps) {
+    update.run(step.title, step.description, step.id);
+  }
+
+  res.redirect('/admin?message=Adoption+process+updated');
+});
 app.use((err, req, res, next) => {
   if (err) return res.status(400).send(`<h1>Upload error</h1><p>${String(err.message)}</p><p><a href="/admin">Back to admin</a></p>`);
   next();
