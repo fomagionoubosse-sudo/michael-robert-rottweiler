@@ -34,3 +34,28 @@
     </button>
   </form>
 </section>
+<section class="panel">
+  <h2>Website Pictures</h2>
+  <p>These controls let you replace the major photos shown on the public website.</p>
+
+  <div class="image-settings">
+    <% images.forEach(im => { %>
+      <form action="/admin/images/<%= im.slot %>" method="post" enctype="multipart/form-data">
+        <h3><%= im.label %></h3>
+
+        <% if(im.image){ %>
+          <img src="/uploads/<%= im.image %>" class="sitepreview">
+        <% } else { %>
+          <div class="sitepreview placeholder">No image uploaded</div>
+        <% } %>
+
+        <input type="file" name="image" accept="image/*" required>
+        <button class="button" type="submit">Replace image</button>
+      </form>
+    <% }) %>
+  </div>
+</section>
+
+</main>
+</body>
+</html>
