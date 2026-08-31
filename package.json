@@ -1,0 +1,16 @@
+{
+  "name": "michael-robert-rottweiler-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rottweiler breeder website with a public puppy catalog and private admin dashboard.",
+  "main": "server.js",
+  "scripts": {"start": "node server.js", "dev": "node --watch server.js"},
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-session": "^1.18.1",
+    "multer": "^1.4.5-lts.1",
+    "better-sqlite3": "^11.3.0"
+  }
+}
