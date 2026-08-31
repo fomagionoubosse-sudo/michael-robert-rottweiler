@@ -105,10 +105,15 @@ function imageUrl(filename) { return filename ? `/uploads/${filename}` : ''; }
 
 app.get('/', (req, res) => {
   const puppies = db.prepare("SELECT * FROM puppies WHERE status != 'Adopted' ORDER BY id DESC").all();
-  const images = Object.fromEntries(db.prepare('SELECT slot,image FROM site_images').all().map(x => [x.slot, imageUrl(x.image)]));
-  res.render('index', { puppies, images });
-});
+  const images = Object.fromEntries(
+    db.prepare('SELECT slot,image FROM site_images')
+      .all()
+      .map(x => [x.slot, imageUrl(x.image)])
+  );
+  const processSteps = db.prepare('SELECT * FROM process_steps ORDER BY id').all();
 
+  res.render('index', { puppies, images, processSteps });
+});
 app.get('/puppy/:id', (req, res) => {
   const puppy = db.prepare('SELECT * FROM puppies WHERE id=?').get(req.params.id);
   if (!puppy) return res.status(404).send('Puppy not found');
