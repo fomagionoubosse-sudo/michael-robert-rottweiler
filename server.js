@@ -28,6 +28,13 @@ CREATE TABLE IF NOT EXISTS puppies (
   image TEXT DEFAULT '',
   created_at TEXT DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS site_images (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  slot TEXT UNIQUE NOT NULL,
+  label TEXT NOT NULL,
+  image TEXT DEFAULT ''
+);
+
 CREATE TABLE IF NOT EXISTS process_steps (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   step_number TEXT NOT NULL,
@@ -35,7 +42,6 @@ CREATE TABLE IF NOT EXISTS process_steps (
   description TEXT NOT NULL
 );
 `);
-
 const imageSlots = [
   ['hero', 'Homepage hero image'],
   ['about', 'About section image'],
